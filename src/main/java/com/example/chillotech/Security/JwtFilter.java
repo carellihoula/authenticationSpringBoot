@@ -1,5 +1,6 @@
 package com.example.chillotech.Security;
 
+import com.example.chillotech.Entity.Jwt;
 import com.example.chillotech.Service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,7 +15,7 @@ import java.io.IOException;
 
 @Service
 public class JwtFilter extends OncePerRequestFilter {
-
+    Jwt jwtDansLaBDD;
     private JwtService jwtService;
     private UserService userService;
     public JwtFilter(JwtService jwtService,UserService userService) {
@@ -34,11 +35,15 @@ public class JwtFilter extends OncePerRequestFilter {
         if(authorization != null && authorization.startsWith("Bearer")){
             //token = authorization.split(" ")[1];
             token = authorization.substring(7);
+            jwtDansLaBDD = this.jwtService.findByToken(token);
             isExpiredToken = jwtService.isExpired(token);
             username = jwtService.extractUsername(token);
         }
         
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+        if(!isExpiredToken
+                && username != null
+                && jwtDansLaBDD.getUser().getEmail().equals(username)
+                && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails userDetails = userService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()

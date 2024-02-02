@@ -53,5 +53,10 @@ public class UserController {
         }
         return null;
     }
+    @PostMapping(path="/deconnexion")
+    public void deconnexion(){
+        this.jwtService.deconnexion();
+    }
+
 
 }
