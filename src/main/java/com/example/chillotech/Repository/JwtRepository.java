@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -19,4 +20,9 @@ public interface JwtRepository extends CrudRepository<Jwt, Integer> {
     //trouver un user à travers son e-mail
     @Query("FROM Jwt j WHERE j.user.email = :email")
     Stream<Jwt> findUser(String email);
+
+    void deleteAllByDesactiveAndIsExpired(boolean desactive, boolean expire);
+    boolean existsByDesactiveAndIsExpired(boolean desactive, boolean isExpired);
+
+    List<Jwt> findAllByDesactiveAndIsExpired(boolean desactive, boolean expire);
 }

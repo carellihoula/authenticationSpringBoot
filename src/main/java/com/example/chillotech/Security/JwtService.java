@@ -1,6 +1,7 @@
 package com.example.chillotech.Security;
 
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import com.example.chillotech.Entity.Jwt;
 import com.example.chillotech.Repository.JwtRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +27,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 
+@Slf4j
 @Transactional
 @Service
 @AllArgsConstructor
@@ -129,6 +133,22 @@ public class JwtService {
         jwt.setExpired(true);
         jwt.setDesactive(true);
         jwtRepository.save(jwt);
+
+    }
+
+    @Scheduled(cron = "0 */1 * * * *")
+    //@Scheduled(cron = "@daily")
+    public void removeUselessJwt(){
+        log.info("suppression des token à "+ Instant.now());
+        boolean listExpiredToken = this.jwtRepository.existsByDesactiveAndIsExpired(true, true);
+        if(listExpiredToken){
+            this.jwtRepository.deleteAllByDesactiveAndIsExpired(
+                    true,
+                    true
+            );
+        }else {
+            log.info("Aucun token désactivé à supprimer actuellement.");
+        }
 
     }
 }
